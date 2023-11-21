@@ -6,6 +6,13 @@ export const editPassword = (data: any) =>
     'method': 'put',
     data
   })
+  // 验证旧密码
+export const oldPassword = (data: any) =>
+request({
+  'url': '/employee/oldPassword',
+  'method': 'put',
+  data
+})
   // 获取营业状态
   export const getStatus = () =>
   request({

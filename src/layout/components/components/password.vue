@@ -39,7 +39,7 @@
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import { Form as ElForm, Input } from 'element-ui'
 // 接口
-import { editPassword } from '@/api/users'
+import { editPassword,oldPassword } from '@/api/users'
 @Component({
   name: 'Password',
 })
@@ -55,6 +55,17 @@ export default class extends Vue {
       callback()
     }
   }
+  private validateOldPassword(rule, value, callback) {
+    // Call the backend API to validate the old password
+    oldPassword({ oldPassword: value })
+      .then((res) => {
+        if(res.data.code==0){
+          callback(new Error('原密码输入不正确'))
+        }else {
+        callback()
+        }
+      })
+  }
   private validatePass2 = (rule, value, callback) => {
     if (!value) {
       callback(new Error('请再次输入密码'))
@@ -65,7 +76,7 @@ export default class extends Vue {
     }
   }
   rules = {
-    oldPassword: [{ validator: this.validatePwd, trigger: 'blur' }],
+    oldPassword: [{ validator: this.validateOldPassword, trigger: 'blur' }],
     newPassword: [{ validator: this.validatePwd, trigger: 'blur' }],
     affirmPassword: [{ validator: this.validatePass2, trigger: 'blur' }],
   }
@@ -81,11 +92,21 @@ export default class extends Vue {
         await editPassword(parnt)
         this.$emit('handleclose')
         ;(this.$refs.form as ElForm).resetFields()
+        this.open()
       } else {
         return false
       }
     })
   }
+   open() {
+        this.$alert('密码修改成功,请重新登录', '提示框', {
+          confirmButtonText: '确定',
+          callback: action => {
+           this.$router.replace({ path: '/login' })
+          }
+        });
+      }
+      
   handlePwdClose() {
     ;(this.$refs.form as ElForm).resetFields()
     this.$emit('handleclose')
